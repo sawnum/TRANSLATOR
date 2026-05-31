@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nepali Translator</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f4ef;
+    --surface: #ffffff;
+    --ink: #1a1714;
+    --ink-muted: #6b6560;
+    --ink-faint: #b5b0aa;
+    --accent: #c84b2f;
+    --accent-light: #fdf0ec;
+    --border: #e2ddd7;
+    --border-strong: #c8c3bc;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .flag {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 2.4rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--ink-muted);
+    font-weight: 300;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .lang-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 0.75rem;
+  }
+
+  .lang-tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .lang-tag.active {
+    color: var(--accent);
+  }
+
+  .lang-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--ink);
+    background: var(--bg);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+  }
+
+  textarea:focus {
+    border-color: var(--border-strong);
+  }
+
+  textarea::placeholder {
+    color: var(--ink-faint);
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.25rem 0;
+  }
+
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+
+  .translate-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+
+  .translate-btn:hover { opacity: 0.88; }
+  .translate-btn:active { transform: scale(0.97); }
+  .translate-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  .translate-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .result-area {
+    background: var(--accent-light);
+    border: 1px solid #f0c4b8;
+    border-radius: 10px;
+    padding: 1rem;
+    min-height: 100px;
+    position: relative;
+  }
+
+  #result-text {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  #result-text.placeholder {
+    color: var(--ink-faint);
+    font-size: 0.95rem;
+    font-style: italic;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s;
+    display: none;
+  }
+
+  .copy-btn:hover { background: var(--border); }
+
+  .error {
+    margin-top: 0.6rem;
+    font-size: 0.83rem;
+    color: #c0392b;
+  }
+
+  .hint {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  footer {
+    margin-top: 2rem;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="flag">🇳🇵</span>
+  <h1>English → <em>नेपाली</em></h1>
+  <p class="subtitle">Translate English text into Nepali instantly</p>
+</header>
+
+<div class="card">
+  <div class="lang-row">
+    <span class="lang-tag active">English</span>
+    <div class="lang-line"></div>
+  </div>
+  <textarea id="input" rows="5" placeholder="Type or paste your English text here..."></textarea>
+  <div id="error" class="error"></div>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <button class="translate-btn" id="translate-btn" onclick="translate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </svg>
+      Translate
+    </button>
+    <div class="divider-line"></div>
+  </div>
+
+  <div class="lang-row">
+    <span class="lang-tag active">Nepali · नेपाली</span>
+    <div class="lang-line"></div>
+  </div>
+
+  <div class="result-area">
+    <p id="result-text" class="placeholder">Your Nepali translation will appear here.</p>
+    <button class="copy-btn" id="copy-btn" onclick="copyResult()">Copy</button>
+  </div>
+</div>
+
+<p class="hint">Tip: Press <kbd style="font-family:monospace; background:#e8e3dd; padding:1px 5px; border-radius:4px; font-size:11px;">Ctrl + Enter</kbd> to translate</p>
+
+<footer>Powered by Claude AI</footer>
+
+<script>
+async function translate() {
+  const input = document.getElementById('input').value.trim();
+  const btn = document.getElementById('translate-btn');
+  const resultEl = document.getElementById('result-text');
+  const copyBtn = document.getElementById('copy-btn');
+  const errorEl = document.getElementById('error');
+
+  errorEl.textContent = '';
+  if (!input) { errorEl.textContent = 'Please enter some text first.'; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Translating...';
+  resultEl.className = 'placeholder';
+  resultEl.textContent = 'Translating...';
+  copyBtn.style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `Translate the following English text to Nepali. Return ONLY the Nepali translation in Devanagari script — no romanization, no explanation, no extra text.\n\nText: ${input}`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    const translation = data.content?.map(b => b.text || '').join('').trim();
+
+    if (translation) {
+      resultEl.className = '';
+      resultEl.textContent = translation;
+      copyBtn.style.display = 'block';
+    } else {
+      errorEl.textContent = 'No translation returned. Please try again.';
+      resultEl.textContent = 'Your Nepali translation will appear here.';
+      resultEl.className = 'placeholder';
+    }
+  } catch (e) {
+    errorEl.textContent = 'Something went wrong. Please try again.';
+    resultEl.textContent = 'Your Nepali translation will appear here.';
+    resultEl.className = 'placeholder';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Translate`;
+}
+
+function copyResult() {
+  const text = document.getElementById('result-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+document.getElementById('input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) translate();
+});
+</script>
+</body>
+</html>
